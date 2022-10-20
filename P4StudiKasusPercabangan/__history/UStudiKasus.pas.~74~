@@ -1,0 +1,235 @@
+unit UStudiKasus;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls,
+  Vcl.Buttons;
+
+type
+  TfrmStudiKasusPercabangan = class(TForm)
+    PageControlStudiKasus1: TPageControl;
+    TabSheetStudiKasus1: TTabSheet;
+    TabSheetStudiKasus2: TTabSheet;
+    Panel1: TPanel;
+    Panel2: TPanel;
+    GroupBox1: TGroupBox;
+    RadioGroupKelas: TRadioGroup;
+    RadioButtonJakarta: TRadioButton;
+    RadioButtonSolo: TRadioButton;
+    RadioButtonSurabaya: TRadioButton;
+    EditTiket: TEdit;
+    EditTotalBayar: TEdit;
+    Label1: TLabel;
+    Label2: TLabel;
+    btnHitung: TButton;
+    btnReset: TButton;
+    btnKeluar: TButton;
+    Panel3: TPanel;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
+    ComboBoxKode: TComboBox;
+    EditQuantity: TEdit;
+    EditNamaBarang: TEdit;
+    EditSatuan: TEdit;
+    EditSubTotal: TEdit;
+    EditDiskon: TEdit;
+    EditTotal: TEdit;
+    btnHitungPenjualan: TBitBtn;
+    btnUlang: TBitBtn;
+    btnClose: TBitBtn;
+    procedure btnHitungClick(Sender: TObject);
+    procedure btnKeluarClick(Sender: TObject);
+    procedure btnResetClick(Sender: TObject);
+    procedure btnHitungPenjualanClick(Sender: TObject);
+    procedure btnCloseClick(Sender: TObject);
+    procedure btnUlangClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmStudiKasusPercabangan: TfrmStudiKasusPercabangan;
+
+implementation
+
+{$R *.dfm}
+
+procedure TfrmStudiKasusPercabangan.btnCloseClick(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TfrmStudiKasusPercabangan.btnHitungClick(Sender: TObject);
+var
+    jmltiket : Integer;
+    totalBayar, Harga : Real;
+begin
+    jmltiket := StrToInt(EditTiket.Text);   //Jurusan Jakarta
+    if (RadioButtonJakarta.Checked = True) and (RadioGroupKelas.ItemIndex = 0) then //Jakarta-Eksekutif
+        begin
+          harga := 70000;
+        end
+
+    else if (RadioButtonJakarta.Checked = True) and (RadioGroupKelas.ItemIndex = 1) then  //Jakarta-Bisnis
+        begin
+           harga := 40000;
+        end
+
+    else if (RadioButtonJakarta.Checked = True) and (RadioGroupKelas.ItemIndex = 2) then  //Jakarta-Ekonomi
+        begin
+          harga := 10000;
+        end
+
+    else if RadioButtonSolo.Checked = true then //Jurusan Solo
+         begin
+           if RadioGroupKelas.ItemIndex = 0 then  //Solo-Eksekutif Diskon 10%
+              begin
+                harga := 80000;
+              end
+           else if RadioGroupKelas.ItemIndex = 1 then //Solo-Bisnis
+              begin
+                harga := 50000;
+              end
+           else if RadioGroupKelas.ItemIndex = 2 then //Solo-Ekonomi
+              begin
+                harga := 20000;
+              end;
+
+         end
+
+    else if RadioButtonSurabaya.Checked then
+         begin
+           case RadioGroupKelas.ItemIndex of
+              0 : Harga := 90000; //Surabaya-Eksekutif
+              1 : Harga := 60000; //Surabaya-Bisnis
+              2 : Harga := 30000; //Surabaya-Ekonomi Diskon 10%
+           end;
+         end;
+
+    totalBayar := harga * jmltiket;
+
+    if ((RadioButtonSurabaya.Checked = True) and (RadioGroupKelas.ItemIndex = 2)) //Discount Surabaya-Ekonomi
+        or (RadioButtonSolo.Checked = True) and (RadioGroupKelas.ItemIndex = 0)   //Discount Solo-Eksekutif
+
+    then
+        begin
+          totalBayar := 0.9 * totalBayar; //Discount 10%
+        end;
+
+    EditTotalBayar.Text := CurrToStr(totalBayar);  //Menampilkan di Layar
+
+end;
+
+procedure TfrmStudiKasusPercabangan.btnHitungPenjualanClick(Sender: TObject);
+var
+    kode,Nama : String;
+    harga, discount, subtotal, totalbayar : Real;
+    qty : Integer;
+
+begin
+    kode := ComboBoxKode.Text;
+    kode := Trim(kode);
+    kode := UpperCase(kode);
+    //
+
+    if length(kode) <> 3 then
+        begin
+          ShowMessage('Kode harus 3 Karakter');
+          ComboBoxKode.SetFocus;
+          Exit;
+        end;
+    if kode = 'A01' then
+        begin
+          Nama := 'Speaker';
+          Harga := 50000;
+        end
+    else if kode = 'B02' then
+         begin
+           Nama := 'Mouse';
+           Harga := 25000;
+         end
+    else if kode = 'C03' then
+         begin
+           Nama := 'Harddisk';
+           Harga := 750000;
+         end
+    else if kode = 'D04' then
+         begin
+           Nama := 'Mouse Pad';
+           Harga := 5000;
+         end
+    else
+        begin
+          ShowMessage('Kode tidak dikenal!');
+          Exit;
+        end;
+    if TryStrToInt(EditQuantity.Text,qty) = False then
+        begin
+          ShowMessage('Quantity harus angka!');
+          Exit;
+        end;
+    if (qty <1 ) or (qty > 10 ) then
+        begin
+          ShowMessage('Quantity hanya boleh beli 1-10');
+          Exit;
+        end;
+
+    EditNamaBarang.Text := Nama;
+    EditSatuan.Text := CurrToStr(harga);
+
+    subtotal := harga * qty;
+    EditSubTotal.Text := CurrToStr(subtotal);
+
+    if subtotal >= 100000 then
+        discount := 0.15 * subtotal
+    else if subtotal>= 50000 then
+        discount := 0.1 * subtotal
+    else if subtotal >= 25000 then
+        discount := 0.05 * subtotal
+    else discount := 0;
+
+    EditDiskon.Text := CurrToStr(discount);
+
+    subtotal := subtotal - discount;
+
+    EditTotal.Text := CurrToStr(subtotal);
+
+end;
+
+procedure TfrmStudiKasusPercabangan.btnKeluarClick(Sender: TObject);
+begin
+    Close;
+end;
+
+procedure TfrmStudiKasusPercabangan.btnResetClick(Sender: TObject);
+begin
+  EditTiket.Text := '';
+  EditTotalBayar.Text := '';
+
+  RadioGroupKelas.ItemIndex := 0;
+  RadioButtonJakarta.Checked := False;
+  RadioButtonSolo.Checked := False;
+  RadioButtonSurabaya.Checked := False;
+end;
+
+procedure TfrmStudiKasusPercabangan.btnUlangClick(Sender: TObject);
+begin
+  ComboBoxKode.Text := '';
+  EditQuantity.Text := '';
+  EditNamaBarang.Text := '';
+  EditSatuan.Text := '';
+  EditSubTotal.Text := '';
+  EditDiskon.Text := '';
+  EditTotal.Text := '';
+end;
+
+end.
